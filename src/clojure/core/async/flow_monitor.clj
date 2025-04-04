@@ -20,9 +20,11 @@
                     :loop-ping? false
                     :flow nil})
 
-(defn clj->transit-str [arg]
+(def default-write-handler (transit/write-handler "Default" (fn [o] (str o))))
+
+(defn clj->transit-str [state arg]
   (let [out (ByteArrayOutputStream. 4096)
-        writer (transit/writer out :json)]
+        writer (transit/writer out :json {:default-handler default-write-handler})]
     (transit/write writer arg)
     (.toString out)))
 
