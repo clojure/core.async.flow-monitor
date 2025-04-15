@@ -1,6 +1,8 @@
 (ns clojurescript.flow-monitor-ui.components.nav
   (:require
     [clojurescript.flow-monitor-ui.global :refer [proc-card-state remove-arrows draw chan-representation]]
+    [clojurescript.flow-monitor-ui.components.log-modal :as log-modal]
+    [clojurescript.flow-monitor-ui.utils.helpers :refer [>dis <sub]]
     [reagent.core :as r]))
 
 
@@ -58,11 +60,16 @@
                                          (false? v) false
                                          :else true))
                                      true @proc-card-state)]
-        [:div.settings-container
-         [:div.settings-icon-wrapper
-          [:button.settings-icon {:class (when @menu-open? "opened")
-                                  :on-click #(swap! menu-open? not)}
-           [:img {:src "assets/img/settings.svg" :alt "Settings"}]]]
+        [:div.settings-icons-container
+         [:div.log-icon-wrapper
+          [:button.log-icon
+           {:on-click #(>dis [::log-modal/set-log-modal-visibility true])}
+           [:img {:src "assets/img/message_icon.svg"}]]]
+         [:div.settings-container
+          [:div.settings-icon-wrapper
+           [:button.settings-icon {:class (when @menu-open? "opened")
+                                   :on-click #(swap! menu-open? not)}
+            [:img {:src "assets/img/settings.svg"}]]]]
          [:div.settings-dropdown {:class (when @menu-open? "active")}
           [:div.settings-header
            [:h3 "Settings"]

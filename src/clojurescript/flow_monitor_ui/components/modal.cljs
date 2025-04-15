@@ -80,14 +80,11 @@
                                  (>dis [::events/inject-complete-alert (str "Data successfully injected to: " t)]))}
                     (str (second t))])]]]))
 
-(defn message-display []
-  [:div "MESSAGES"])
-
 (defn error-display []
   (let [pid (:active-proc-pid @global-state)]
     [:div#error-display
-     (for [error (-> @global-state :errors pid)]
-       ^{:key (random-uuid)}
+     (for [[idx error] (map-indexed vector (-> @global-state :errors pid))]
+       ^{:key idx}
        [:pre error])]))
 
 (defn titleize-keyword [kw]
@@ -118,11 +115,6 @@
                                (swap! global-state assoc :active-tab :inject)
                                (handle-tab-click :inject))}
          "Inject"]
-        [:div.tab {:class (when (= (:active-tab @global-state) :messages) "active")
-                   :on-click (fn [e]
-                               (swap! global-state assoc :active-tab :messages)
-                               (handle-tab-click :messages))}
-                               "Messages"]
         [:div.tab {:class (when (= (:active-tab @global-state) :errors) "active")
                    :on-click (fn [e]
                                (swap! global-state assoc :active-tab :errors)
@@ -132,7 +124,5 @@
        [:div.panel-contents
         (case (:active-tab @global-state)
           :inject [inject]
-          :messages [message-display]
-          :errors [error-display])]
-       ]]]))
+          :errors [error-display])]]]]))
 

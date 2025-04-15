@@ -13,8 +13,8 @@
                                :data nil
                                :flow-ping {}
                                :errors {}
-                               :messages {}
-                               :active-tab :messages
+                               :messages []
+                               :active-tab :errors
                                :active-proc-pid :nil}))
 
 (def lines (r/atom {}))
@@ -147,12 +147,13 @@
               (swap! global-pings update-in [:flow-ping]
                      (fn [ping-map]
                        (merge-with #(assoc (merge %1 %2) :last-updated current-time)
-                         ping-map
-                         (:data data)))))
-      :error (do
-               (let [pid (keyword (second (re-find #":pid :(.*)," (:data data))))]
-                 (swap! global-state update-in [:errors pid]
-                        (fnil (comp #(take-last 100 %) conj) []) (:data data))))
+                                   ping-map
+                                   (:data data)))))
+      :error (let [pid (keyword (second (re-find #":pid :(.*)," (:data data))))]
+               (swap! global-state update-in [:errors pid]
+                      (fnil (comp #(take-last 100 %) conj) []) (:data data)))
+      :message (swap! global-state update-in [:messages]
+                      (fnil (comp #(take-last 1000 %) conj) []) (:data data))
       "Default")))
 
 (rf/reg-sub

@@ -107,7 +107,7 @@
           (do
             (if (= port error-chan)
               (send-message state {:action :error :data (with-out-str (clojure.pprint/pprint val))})
-              (send-message state {:action :message :data (with-out-str (clojure.pprint/pprint val))}))
+              (send-message state {:action :message :data val}))
             (recur))))))
   nil)
 

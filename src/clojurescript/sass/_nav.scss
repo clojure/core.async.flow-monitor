@@ -9,15 +9,53 @@ $border-color: #e0e0e0;
 $shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 $transition-speed: 0.3s;
 
+.settings-icons-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1001;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: center;
+}
+
+.log-icon-wrapper {
+  .log-icon {
+    border-radius: 50%;
+    background-color: $light-1;
+    box-shadow: $shadow;
+    width: $icon-size;
+    height: $icon-size;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform $transition-speed ease;
+    padding: 0;
+
+    &.opened {
+      background-color: $light-3;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
 .settings-container {
   position: relative;
   z-index: 1000;
 }
 
 .settings-icon-wrapper {
-  position: fixed;
-  top: 16px;
-  right: 16px;
   z-index: 1001;
   .settings-icon {
     border-radius: 50%;
@@ -58,9 +96,9 @@ $transition-speed: 0.3s;
   box-shadow: $shadow;
   transform: translateY(-100%);
   transition: transform $transition-speed ease;
-  z-index: 1000;
   overflow-y: auto;
   color: $light-2;
+  z-index: 99;
 
   &.active {
     transform: translateY(0);

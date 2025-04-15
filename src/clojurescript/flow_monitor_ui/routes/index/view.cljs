@@ -4,6 +4,7 @@
             [clojure.string :as str]
             [reagent.core :as r]
             [clojurescript.flow-monitor-ui.components.modal :as component]
+            [clojurescript.flow-monitor-ui.components.log-modal :refer [log-modal]]
             [clojurescript.flow-monitor-ui.global :refer [lines remove-arrows
                                                           draw make-websocket!
                                                           global-state global-pings
@@ -378,6 +379,7 @@
      [settings-bar])
    [:div
     [component/report-modal]
+    [log-modal]
     (if (:ws-connected @global-state)
       [chart]
       [ws-connect-btn])]])
