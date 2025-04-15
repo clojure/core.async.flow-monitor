@@ -1,0 +1,39 @@
+// Modern standard scrollbar styling
+* {
+  // For Firefox
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+
+  // For Chrome, Edge, and Safari
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background-color: transparent;
+}
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+    border-radius: 10px;
+}
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+  // Hide scrollbars when not hovering (auto-hide behavior)
+  &:not(:hover)::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+}
+
+// For Internet Explorer (if needed)
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+* {
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+}
