@@ -16,11 +16,11 @@
 
 ; = Data Shaping Functions =====================================================
 (defn titleize-keyword [kw]
-  (when kw (-> (name kw)
-               (clojure.string/replace #"-" " ")
-               (clojure.string/split #"\s+")
-               (->> (map clojure.string/capitalize)
-                    (clojure.string/join " ")))))
+  (as-> (name kw) $
+        (clojure.string/replace $ #"-" " ")
+        (clojure.string/split $ #"\s+")
+        (map clojure.string/capitalize $)
+        (clojure.string/join " " $)))
 
 (defn format-number [n]
   (if n

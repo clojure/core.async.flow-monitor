@@ -40,7 +40,7 @@ Add the following dependency to your project:
 ;; http://localhost:9876/index.html#/?port=9876
 ```
 
-## Custom Transit Handlers
+### Custom Transit Handlers
 
 You can provide custom Transit write handlers to properly serialize types that aren't natively supported by Transit (used for visualizing state). These handlers should follow the format expected by cognitect.transit/writer :handlers. If not provided, the default handler will be used, which converts objects to strings.
 
@@ -89,6 +89,21 @@ You can run multiple monitoring servers simultaneously to monitor different flow
 ;; Stop them independently
 (monitor/stop-server server1)
 (monitor/stop-server server2)
+```
+
+## Static Flow Graph
+
+Both [Cursive](https://youtu.be/ZXIZdMcHUCA) and [Calva](https://calva.io/flares/) support displaying HTML in the editor. A static graph can be generated from your flow-config and displayed in either of those editor environments with the following:
+
+``` clojure 
+(:require 
+  [clojure.core.async.flow-static :refer [graph]]
+  [clojure.core.async.flow :as flow])
+
+;; Create a flow
+(def my-flow (flow/create-flow ...))
+
+(graph my-flow)
 ```
 
 ## License
