@@ -106,6 +106,10 @@ Both [Cursive](https://youtu.be/ZXIZdMcHUCA) and [Calva](https://calva.io/flares
 (graph my-flow)
 ```
 
+## Contributing
+
+[Contributing to Clojure projects](https://clojure.org/community/contributing) requires a signed Contributor Agreement. Pull requests and GitHub issues are not accepted; please use the [core.async.flow-monitor JIRA project](https://clojure.atlassian.net/browse/AFMON) to report problems or enhancements.
+
 ## License
 
 Copyright © 2025

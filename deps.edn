@@ -1,7 +1,7 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.12.0"}
         org.clojure/core.async {:git/url "https://github.com/clojure/core.async.git"
-                                :sha "7cc715ac25b4a0f232a7fe1049f90f14ef10fd96"}
+                                :sha "ceaa94bfe1158d4c2f1013d2bf77309bf81edb17"}
         metosin/reitit            {:mvn/version "0.6.0"}
         http-kit/http-kit         {:mvn/version "2.7.0"}
         com.cognitect/transit-clj {:mvn/version "1.0.329"}
