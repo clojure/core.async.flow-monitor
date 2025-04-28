@@ -217,7 +217,8 @@
                     (>dis [::component/set-modal-visibility true]))}
        [:img {:src "assets/img/inject_icon.svg"}]]
       [:div.action-button
-       {:on-click (fn [evt]
+       {:class (when (-> errors count zero? not) "error")
+        :on-click (fn [evt]
                     (swap! global-state assoc :active-tab :errors)
                     (swap! global-state assoc :active-proc-pid proc)
                     (.add (.-classList (.-body js/document)) "modal-open")

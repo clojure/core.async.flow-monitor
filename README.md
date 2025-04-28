@@ -10,7 +10,6 @@ Flow Monitor provides a web-based interface for visualizing, monitoring, and int
 
 With Flow Monitor, you can observe the structure of your flow, track the state of processes and the async channels between them, control process execution by pausing and resuming them, inject data into channels, and view any errors or messages that emerge from the flow.
 
-
 ## Installation
 
 Add the following dependency to your project:

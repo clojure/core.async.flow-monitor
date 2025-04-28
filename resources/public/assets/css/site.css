@@ -1431,6 +1431,12 @@ body.modal-open {
   transition: background 0.2s;
   z-index: 10;
 }
+.card-container .proc-card .expanded-view .action-buttons .action-button.error {
+  background: #721414;
+}
+.card-container .proc-card .expanded-view .action-buttons .action-button.error:hover {
+  background: rgb(135.6940298507, 23.8059701493, 23.8059701493);
+}
 .card-container .proc-card .expanded-view .action-buttons .action-button:hover {
   background: rgb(116.609947644, 134.3848167539, 150.890052356);
 }

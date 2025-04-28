@@ -268,6 +268,13 @@ body.modal-open {
           transition: background 0.2s;
           z-index: 10;
 
+          &.error {
+            background: $light-14;
+            &:hover {
+              background: color.adjust($light-14, $lightness: 5%);
+            }
+          }
+
           &:hover {
             background: color.adjust($light-20, $lightness: 15%);
           }
