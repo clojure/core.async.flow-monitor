@@ -91,7 +91,7 @@ You can run multiple monitoring servers simultaneously to monitor different flow
 
 ## Static Flow Graph
 
-Both [Cursive](https://youtu.be/ZXIZdMcHUCA) and [Calva](https://calva.io/flares/) support displaying HTML in the editor. A static graph can be generated from your flow-config and displayed in either of those editor environments with the following:
+Both [Cursive](https://cursive-ide.com/blog/cursive-2025.1.html) and [Calva](https://calva.io/flares/) support displaying HTML in the editor. A static graph can be generated from your flow-config and displayed in either of those editor environments with the following:
 
 ``` clojure 
 (:require 
