@@ -48,6 +48,29 @@
       last-leader-line)))
 
 (defn draw []
+  (doall (for [root (:roots @global-state)]
+           (do
+             (let [chan-type @chan-representation
+                   proc (first root)
+                   in-expanded? (get @proc-card-state proc)]
+               (doall (for [in (-> root second :ins)
+                            :when (and (-> in second :buffer) (-> in second :chan-obj))]
+                        (let [in-socket (str proc "-" (first in))
+                              in-socket-target (if in-expanded?
+                                                 in-socket
+                                                 (str in-socket "-collapsed"))
+                              in-chan (str in-socket "-in-chan")
+                              in-chan-el (when (= :meter chan-type) (.getElementById js/document in-chan))
+                              in-socket-el (.getElementById js/document in-socket-target)]
+                          (when (= :meter chan-type)
+                            (let [l1 (js/LeaderLine. in-chan-el in-socket-el (clj->js {:color "#52606D"
+                                                                                       :size 3
+                                                                                       :startSocket "bottom"
+                                                                                       :hide true
+                                                                                       :endSocket "top"
+                                                                                       :path "straight" #_"grid" #_"straight"}))]
+                              (.show l1 "draw")
+                              (swap! lines assoc (random-uuid) l1))))))))))
   (doall (for [proc (-> @global-state :data :conns)]
            (do
              (let [chan-type @chan-representation
@@ -68,18 +91,18 @@
                    out-socket-el (.getElementById js/document out-socket-target)
                    in-socket-el (.getElementById js/document in-socket-target)]
                (if (= :meter chan-type)
-                 (let [l1 (js/LeaderLine. out-socket-el out-chan-el (clj->js {:color "#52606D"
-                                                                              :size 3
-                                                                              :startSocket "bottom"
-                                                                              :hide true
-                                                                              :endSocket "top"
-                                                                              :path "straight" #_ "grid" #_ "straight"}))
-                       l2 (js/LeaderLine. out-chan-el in-socket-el (clj->js {:color "#52606D"
+                 (let [l1 (js/LeaderLine. out-socket-el in-chan-el (clj->js {:color "#52606D"
                                                                              :size 3
                                                                              :startSocket "bottom"
                                                                              :hide true
                                                                              :endSocket "top"
-                                                                             :path "grid" #_ "grid" #_ "straight"}))]
+                                                                             :path "grid" #_ "grid" #_ "straight"}))
+                       l2 (js/LeaderLine. in-chan-el in-socket-el (clj->js {:color "#52606D"
+                                                                            :size 3
+                                                                            :startSocket "bottom"
+                                                                            :hide true
+                                                                            :endSocket "top"
+                                                                            :path "straight" #_ "grid" #_ "straight"}))]
                    (.show l1 "draw")
                    (swap! lines assoc (random-uuid) l1)
                    (.show l2 "draw")
@@ -92,12 +115,12 @@
                                                                                  :hide true
                                                                                  :endPlug (if product/FIREFOX "behind" "arrow1")
                                                                                  :animOptions (clj->js {:duration 1000 :timing "ease"})
-                                                                                 :startLabel (js/LeaderLine.captionLabel "0/10" (clj->js {:color "#52606D" :outlineColor "#CBD2D9"}))
+                                                                                 ; :startLabel (js/LeaderLine.captionLabel "0/10" (clj->js {:color "#52606D" :outlineColor "#CBD2D9"}))
                                                                                  ; TODO Conditional upon unique chan id
-                                                                                 #_ #_ :endLabel (js/LeaderLine.captionLabel "0/10"
-                                                                                                                             {:color "#52606D"
-                                                                                                                              :outlineColor "#CBD2D9"
-                                                                                                                              #_#_:offset [-20 0]})}))]
+                                                                                 :startLabel (js/LeaderLine.captionLabel "0/10"
+                                                                                                                       {:color "#52606D"
+                                                                                                                        :outlineColor "#CBD2D9"
+                                                                                                                        #_#_:offset [-20 0]})}))]
                    (.show line "draw")
                    ;(set! (.-id line) (str in-socket "-" out-socket))
                    (set-id-on-last-leader-line! (str out-socket "-svg"))

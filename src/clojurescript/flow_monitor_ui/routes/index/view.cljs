@@ -37,25 +37,27 @@
           {} data))
 
 (defn assoc-ping-data [relationships ping]
-  (reduce-kv (fn [res proc data]
-               (-> res
-                   (assoc-in [proc :status] (:clojure.core.async.flow/status data))
-                   (assoc-in [proc :count] (:clojure.core.async.flow/count data))
-                   (assoc-in [proc :ins] (:clojure.core.async.flow/ins data))
-                   (assoc-in [proc :outs] (:clojure.core.async.flow/outs data))
-                   (assoc-in [proc :state] (:clojure.core.async.flow/state data))
-                   (assoc-in [proc :ins :in :put-count] (-> data :clojure.core.async.flow/ins :in :put-count))
-                   (assoc-in [proc :ins :in :take-count] (-> data :clojure.core.async.flow/ins :in :take-count))
-                   (assoc-in [proc :ins :in :buffer :type] (-> data :clojure.core.async.flow/ins :in :buffer :type))
-                   (assoc-in [proc :ins :in :buffer :count] (-> data :clojure.core.async.flow/ins :in :buffer :count))
-                   (assoc-in [proc :ins :in :buffer :capacity] (-> data :clojure.core.async.flow/ins :in :buffer :capacity))
-                   (assoc-in [proc :outs :out :put-count] (-> data :clojure.core.async.flow/outs :in :put-count))
-                   (assoc-in [proc :outs :out :take-count] (-> data :clojure.core.async.flow/outs :in :take-count))
-                   (assoc-in [proc :outs :out :buffer :type] (-> data :clojure.core.async.flow/outs :out :buffer :type))
-                   (assoc-in [proc :outs :out :buffer :count] (-> data :clojure.core.async.flow/outs :out :buffer :count))
-                   (assoc-in [proc :outs :out :buffer :capacity] (-> data :clojure.core.async.flow/outs :out :buffer :capacity))
-                   ))
-             relationships ping))
+  (let [r+p (reduce-kv (fn [res proc data]
+                         (-> res
+                             (assoc-in [proc :status] (:clojure.core.async.flow/status data))
+                             (assoc-in [proc :count] (:clojure.core.async.flow/count data))
+                             (assoc-in [proc :ins] (:clojure.core.async.flow/ins data))
+                             (assoc-in [proc :outs] (:clojure.core.async.flow/outs data))
+                             (assoc-in [proc :state] (:clojure.core.async.flow/state data))
+                             (assoc-in [proc :ins :in :put-count] (-> data :clojure.core.async.flow/ins :in :put-count))
+                             (assoc-in [proc :ins :in :take-count] (-> data :clojure.core.async.flow/ins :in :take-count))
+                             (assoc-in [proc :ins :in :buffer :type] (-> data :clojure.core.async.flow/ins :in :buffer :type))
+                             (assoc-in [proc :ins :in :buffer :count] (-> data :clojure.core.async.flow/ins :in :buffer :count))
+                             (assoc-in [proc :ins :in :buffer :capacity] (-> data :clojure.core.async.flow/ins :in :buffer :capacity))
+                             (assoc-in [proc :outs :out :put-count] (-> data :clojure.core.async.flow/outs :in :put-count))
+                             (assoc-in [proc :outs :out :take-count] (-> data :clojure.core.async.flow/outs :in :take-count))
+                             (assoc-in [proc :outs :out :buffer :type] (-> data :clojure.core.async.flow/outs :out :buffer :type))
+                             (assoc-in [proc :outs :out :buffer :count] (-> data :clojure.core.async.flow/outs :out :buffer :count))
+                             (assoc-in [proc :outs :out :buffer :capacity] (-> data :clojure.core.async.flow/outs :out :buffer :capacity))
+                             )) relationships ping)
+        roots (filter (fn [[_ v]] (empty? (:from v))) r+p)]
+    (swap! global-state assoc :roots roots)
+    r+p))
 
 (defn flow-levels [relationships]
   (loop [result []
@@ -231,7 +233,7 @@
                       (send-socket-data {:action :pause-proc :pid proc})
                       (send-socket-data {:action :resume-proc :pid proc})))}
        [:img {:src (if paused? "assets/img/pause_icon_orange.svg" "assets/img/pause_icon_white.svg")}]]]
-     (when (> since-last-updated 0) [:div.stale "Last Updated: " since-last-updated " seconds ago."])]))
+     (when (> since-last-updated 10) [:div.stale "Last Updated: " since-last-updated " seconds ago."])]))
 
 (defn buffer-usage-percentage [buffer-count buffer-capacity]
   (* 100 (/ (js/parseInt buffer-count) (js/parseInt buffer-capacity))))
@@ -305,12 +307,12 @@
       (update-arrows proc ins outs)
       [:div.card-container {:id (name proc)
                             :class (when (= :line @chan-representation) "line-chan-style")}
-       ; TODO Conditional upon having a distinct channel id
-       #_ [:div.meter-cards
-           (doall (for [in ins
-                        :when (-> in second :buffer :type)]
-                    (let [in-name (first in)]
-                      ^{:key in-name} [meter-card proc in])))]
+       [:div.meter-cards.animate__animated.collapsible-meter
+        {:class (if (= :meter @chan-representation) "animate__fadeInDown" "animate__fadeOutUp")}
+        (doall (for [in ins
+                     :when (-> in second :buffer :type)]
+                 (let [in-name (first in)]
+                   ^{:key in-name} [meter-card proc in])))]
        [:div.proc-card {:class (str (if expanded? "expanded" "collapsed"))}
         (if paused?
           [:div.dot-pattern.animate__animated.animate__fadeIn]
@@ -352,7 +354,7 @@
            (doall (for [[io-id buffer-stats] outs
                         :when (-> buffer-stats :buffer :type)]
                     ^{:key (str proc "-" io-id)} [:div.output {:id (str proc "-" io-id "-collapsed")}]))]]]]
-       [:div.output-cards.animate__animated.collapsible-meter
+       #_ [:div.output-cards.animate__animated.collapsible-meter
         {:class (if (= :meter @chan-representation)
                   "animate__fadeInDown"
                   "animate__fadeOutUp")}
