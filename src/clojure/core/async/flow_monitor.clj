@@ -83,7 +83,7 @@
     {:on-open (fn [ch]
                 (swap! state update-in [:channels] conj ch)
                 (send-message state {:action :datafy
-                                     :data (d/datafy (:flow @state))})
+                                     :data (assoc (d/datafy (:flow @state)) :root (:root @state))})
                 (swap! state assoc-in [:loop-ping?] true)
                 (loop-ping state))
      :on-receive (fn [ch data]
@@ -141,11 +141,11 @@
 
   Returns:
   An atom containing the server's state, and prints a local url where the frontend can be reached"
-  [{:keys [flow port handlers filters] :or {port 9998}}]
+  [{:keys [flow port handlers filters root] :or {port 9998}}]
   (let [state (atom default-state)
         error-chan (:clojure.datafy/obj (meta (:error (:chans (d/datafy flow)))))
         report-chan (:clojure.datafy/obj (meta (:report (:chans (d/datafy flow)))))]
-    (swap! state assoc :flow flow :handlers handlers :filters filters)
+    (swap! state assoc :flow flow :handlers handlers :filters filters :root root)
     (report-monitoring state report-chan error-chan)
     (let [server (httpkit/run-server (app state) {:port port
                                                   :max-body 100000000

@@ -59,16 +59,18 @@
     (swap! global-state assoc :roots roots)
     r+p))
 
-(defn flow-levels [relationships]
-  (loop [result []
-         current-level (filter (fn [[_ v]] (empty? (:from v))) relationships)
-         remaining (apply dissoc relationships (map first current-level))]
-    (if (empty? current-level)
-      result
-      (let [next-level (select-keys remaining (mapcat (fn [[_ v]] (:to v)) current-level))]
-        (recur (conj result (map (fn [[k v]] {k v}) current-level))
-               next-level
-               (apply dissoc remaining (keys next-level)))))))
+(defn flow-levels [relationships root]
+  (let [orphans (filter (fn [[_ v]] (empty? (:from v))) relationships)
+        user-roots (filter (fn [[k _]] (contains? (set root) k)) relationships)]
+    (loop [result []
+           current-level (if (empty? orphans) user-roots orphans)
+           remaining (apply dissoc relationships (map first current-level))]
+      (if (empty? current-level)
+        result
+        (let [next-level (select-keys remaining (mapcat (fn [[_ v]] (:to v)) current-level))]
+          (recur (conj result (map (fn [[k v]] {k v}) current-level))
+                 next-level
+                 (apply dissoc remaining (keys next-level))))))))
 
 ; = Components =================================================================
 
@@ -372,7 +374,7 @@
         relationships (flow-relationships (:conns data))
         relationships* (assoc-ping-data relationships (-> @global-pings :flow-ping))]
     [:div#chart
-     (when data (for [[idx row] (map-indexed vector (flow-levels relationships*))]
+     (when data (for [[idx row] (map-indexed vector (flow-levels relationships* (:root data)))]
                   ^{:key (str "chart-" idx)} [proc-row idx row]))]))
 
 ; = Template ===================================================================

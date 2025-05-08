@@ -24,16 +24,18 @@
                 (update-in [from-proc :outs] (fnil conj []) out-port)))
           {} data))
 
-(defn flow-levels [relationships]
-  (loop [result []
-         current-level (filter (fn [[_ v]] (empty? (:from v))) relationships)
+(defn flow-levels [relationships root]
+  (let [orphans (filter (fn [[_ v]] (empty? (:from v))) relationships)
+        user-roots (filter (fn [[k _]] (contains? (set root) k)) relationships)]
+    (loop [result []
+         current-level (if (empty? orphans) user-roots orphans)
          remaining (apply dissoc relationships (map first current-level))]
     (if (empty? current-level)
       result
       (let [next-level (select-keys remaining (mapcat (fn [[_ v]] (:to v)) current-level))]
         (recur (conj result (map (fn [[k v]] {k v}) current-level))
                next-level
-               (apply dissoc remaining (keys next-level)))))))
+               (apply dissoc remaining (keys next-level))))))))
 
 (defn proc-card [proc]
   [:div.middle-section-one-container
@@ -60,10 +62,10 @@
    (for [proc row]
      (proc-el proc))])
 
-(defn chart [conns]
+(defn chart [conns root]
   (let [relationships (flow-relationships conns)]
     [:div#chart
-     (for [[idx row] (map-indexed vector (flow-levels relationships))]
+     (for [[idx row] (map-indexed vector (flow-levels relationships root))]
        (proc-row idx row))]))
 
 (defn json-friendly [conn]
@@ -79,7 +81,7 @@
 (defn connections-to-json [connections]
   (json/write-str (mapv json-friendly connections)))
 
-(defn template [{:keys [conns]}]
+(defn template [{:keys [conns]} root]
   (str
     (h/html
       [:html
@@ -116,8 +118,8 @@ window.addEventListener('load', function() {
   drawConnections();});")]
         [:style "html,\nbody {\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  height: 100vh;\n  width: 100vw;\n  margin-top: 50px;\n  background-color: #CBD2D9;\n}\n\n.row-3 {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n  gap: 10px;\n  align-items: center;\n}\n\n.card-container {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  margin-bottom: 40px;\n  min-width: 220px;\n}\n.card-container .proc-card {\n  background: #F5F7FA;\n  border-radius: 3px;\n  width: 100%;\n  display: inline-block;\n  position: relative;\n  transition: all 0.4s ease-in-out;\n  will-change: height;\n  margin-bottom: 55px;\n}\n.card-container .proc-card.expanded .expanded-view {\n  max-height: 500px;\n  opacity: 1;\n  visibility: visible;\n}\n.card-container .proc-card .expanded-view {\n  transition: all 0.4s ease-in-out;\n  max-height: 0;\n  opacity: 0;\n  overflow: hidden;\n  visibility: hidden;\n}\n.card-container .proc-card .expanded-view .header-labels {\n  display: flex;\n  justify-content: center;\n  padding: 0 15px;\n}\n.card-container .proc-card .expanded-view .header-labels .header-label {\n  font-size: 1.75em;\n  font-weight: 500;\n  color: #4a4a4a;\n  text-align: center;\n  width: 150px;\n}\n.card-container .proc-card .expanded-view .middle-section-one-container {\n  box-sizing: border-box;\n  background: #52606D;\n  color: #E4E7EB;\n  border-radius: 2px;\n  position: relative;\n  padding: 10px 0;\n  width: calc(100% - 20px);\n  margin: auto;\n}\n.card-container .proc-card .expanded-view .title-container {\n  text-align: center;\n}\n.card-container .proc-card .expanded-view .title-container .title {\n  font-size: 2.3em;\n  font-weight: 600;\n  margin: 0;\n  color: white;\n}\n.card-container .proc-card .output-section {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  box-sizing: border-box;\n}\n.card-container .proc-card .output-section .output-container {\n  display: flex;\n  flex-direction: row;\n  gap: 15px;\n  justify-content: center;\n  align-items: center;\n  width: calc(100% - 14px);\n  margin: 0 7px;\n  padding: 0 0;\n  box-sizing: border-box;\n}\n.card-container .proc-card .output-section .output-container .output {\n  flex: 1;\n  min-width: 110px;\n  padding: 0 8px;\n  font-size: 1.75em;\n  color: #4a4a4a;\n  text-align: center;\n  height: 40px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  white-space: nowrap;\n}\n"]]
        [:body
-        (chart conns)]])))
+        (chart conns root)]])))
 
-(defn graph [flow-config]
-  (tagged-literal 'flare/html {:html (template flow-config)
+(defn graph [flow-config & root]
+  (tagged-literal 'flare/html {:html (template flow-config (first root))
                                :title "Flow Chart"}))
