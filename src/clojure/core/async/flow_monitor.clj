@@ -1,7 +1,7 @@
 (ns clojure.core.async.flow-monitor
   (:require
     [clojure.core.async :as async]
-    [clojure.core.async.flow :as flow]
+    [clojure.core.async.flow :as async-flow]
     [ring.util.response :as response]
     [ring.middleware.content-type :refer [wrap-content-type]]
     [ring.middleware.not-modified :refer [wrap-not-modified]]
@@ -72,7 +72,7 @@
                                                                        (assoc k (mainline-chan-meta v))
                                                                        (assoc k (filter-state v (:filters @state)))))
                                                                  {}
-                                                                 (flow/ping (:flow @state))))})
+                                                                 (async-flow/ping (:flow @state))))})
             (Thread/sleep 1000)
             (recur s))
         (println "Ping loop stopped")))))
@@ -90,9 +90,9 @@
                    (let [clj-data (transit-str-reader data)
                          action (:action clj-data)]
                      (case action
-                       :inject (flow/inject (:flow @state) (:target clj-data) (edn/read-string (:data clj-data)))
-                       :resume-proc (flow/resume-proc (:flow @state) (:pid clj-data))
-                       :pause-proc (flow/pause-proc (:flow @state) (:pid clj-data)))))
+                       :inject (async-flow/inject (:flow @state) (:target clj-data) (edn/read-string (:data clj-data)))
+                       :resume-proc (async-flow/resume-proc (:flow @state) (:pid clj-data))
+                       :pause-proc (async-flow/pause-proc (:flow @state) (:pid clj-data)))))
      :on-close (fn [ch status]
                  (swap! state assoc-in [:loop-ping?] false)
                  (swap! state update-in [:channels] disj ch))
@@ -145,6 +145,7 @@
   (let [state (atom default-state)
         error-chan (:clojure.datafy/obj (meta (:error (:chans (d/datafy flow)))))
         report-chan (:clojure.datafy/obj (meta (:report (:chans (d/datafy flow)))))]
+    (async-flow/ping flow)
     (swap! state assoc :flow flow :handlers handlers :filters filters :root root)
     (report-monitoring state report-chan error-chan)
     (let [server (httpkit/run-server (app state) {:port port
