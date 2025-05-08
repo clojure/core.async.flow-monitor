@@ -43,6 +43,21 @@
       :clojure.core.async.flow/ins (reduce-kv reducer-fn {} (:clojure.core.async.flow/ins proc))
       :clojure.core.async.flow/outs (reduce-kv reducer-fn {} (:clojure.core.async.flow/outs proc)))))
 
+(defn default-flow-state-filter [proc-state]
+  (into {} (filter (fn [[k _]] (not= "clojure.core.async.flow" (namespace k))) proc-state)))
+
+(defn filter-state [proc filters]
+  (let [pid (:clojure.core.async.flow/pid proc)
+        user-filter (cond
+                      (contains? filters pid) (pid filters)
+                      (contains? filters :default) (:default filters)
+                      :else identity)
+        filtered-state (->> (:clojure.core.async.flow/state proc)
+                            (default-flow-state-filter)
+                            (filter user-filter)
+                            (into {}))]
+    (assoc proc :clojure.core.async.flow/state filtered-state)))
+
 (defn send-message [state message]
   (doall (for [channel (:channels @state)]
            (httpkit/send! channel (transit-str-writer message (:handlers @state))))))
@@ -53,7 +68,9 @@
       (if (:loop-ping? @s)
         (do (send-message state {:action :ping :data (d/datafy (reduce-kv
                                                                  (fn [res k v]
-                                                                   (assoc res k (mainline-chan-meta v)))
+                                                                   (-> res
+                                                                       (assoc k (mainline-chan-meta v))
+                                                                       (assoc k (filter-state v (:filters @state)))))
                                                                  {}
                                                                  (flow/ping (:flow @state))))})
             (Thread/sleep 1000)
@@ -124,11 +141,11 @@
 
   Returns:
   An atom containing the server's state, and prints a local url where the frontend can be reached"
-  [{:keys [flow port handlers] :or {port 9998}}]
+  [{:keys [flow port handlers filters] :or {port 9998}}]
   (let [state (atom default-state)
         error-chan (:clojure.datafy/obj (meta (:error (:chans (d/datafy flow)))))
         report-chan (:clojure.datafy/obj (meta (:report (:chans (d/datafy flow)))))]
-    (swap! state assoc :flow flow :handlers handlers)
+    (swap! state assoc :flow flow :handlers handlers :filters filters)
     (report-monitoring state report-chan error-chan)
     (let [server (httpkit/run-server (app state) {:port port
                                                   :max-body 100000000

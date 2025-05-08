@@ -207,7 +207,7 @@
         paused? (= :paused (:status proc-stats))]
     [:div.middle-section-one-container
      [:div.title-container [:h2.title (titleize-keyword proc)]]
-     (when (:state proc-stats)
+     (when (not-empty (:state proc-stats))
        [:div.state [:pre.code-block [:code (fmt-state (:state proc-stats))]]])
      [:div.call-count (format-number (:count proc-stats))]
      [:div.action-buttons
