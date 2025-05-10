@@ -89,6 +89,46 @@ You can run multiple monitoring servers simultaneously to monitor different flow
 (monitor/stop-server server2)
 ```
 
+### Filtering Proc State
+
+It is common for the state to contain credentials and other sensitive information not intended to be displayed in the monitor. Filter predicates can optionally be provided when starting the monitor to filter the state data of flow procs.
+
+``` clojure 
+;; Create a flow
+(def my-flow (flow/create-flow ...))
+
+;; Start the monitoring server
+;;; In this example
+;;; The :categorize proc will have the :salary value removed
+;;; and :db-pass will be removed from all procs other than :categorize
+(def server-state (monitor/start-server {:flow my-flow 
+                                         :state-filters {:categorize (fn [[k v]] (not= :salary k))
+                                                         :default (fn [[k v]] (not= :db-pass k))}}))
+```
+
+
+### Circular Flows
+
+It is valid to create a cyclical flow. The monitor displays procs without a `[to-pid inid]` at the top as roots. A circular flow will need to specify the intended root explicitly. A vector of :pid keywords can optionally be provided when starting the monitor to designate the root procs.
+
+``` clojure 
+
+(def flow-config {:procs ...
+                  :conns [[[:a :out] [:b :in]]
+                          [[:b :out] [:a :in]]]})
+                          
+;; Create a flow
+(def my-flow (flow/create-flow flow-config))
+
+;; Start the monitoring server specifying the root proc(s)
+(def server-state (monitor/start-server {:flow my-flow
+                                         ;; Multiple roots can be provided if desired
+                                         :root [:a]})) 
+                                         
+;; Inline static flow graphs also require the root to be specified for circular flows
+(static/graph flow-config [:a])                                     
+```
+
 ## Static Flow Graph
 
 Both [Cursive](https://cursive-ide.com/blog/cursive-2025.1.html) and [Calva](https://calva.io/flares/) support displaying HTML in the editor. A static graph can be generated from your flow-config and displayed in either of those editor environments with the following:
@@ -99,9 +139,12 @@ Both [Cursive](https://cursive-ide.com/blog/cursive-2025.1.html) and [Calva](htt
   [clojure.core.async.flow :as flow])
 
 ;; Create a flow
-(def my-flow (flow/create-flow ...))
+(def flow-config {:procs ... 
+                  :conns ...})
+                  
+(graph flow-config) ; Takes a config not what is returned from create-flow
 
-(graph my-flow)
+(def my-flow (flow/create-flow flow-config))
 ```
 
 ## Contributing

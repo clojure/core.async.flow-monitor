@@ -48,14 +48,18 @@
 
 (defn filter-state [proc filters]
   (let [pid (:clojure.core.async.flow/pid proc)
+        state (:clojure.core.async.flow/state proc)
         user-filter (cond
                       (contains? filters pid) (pid filters)
                       (contains? filters :default) (:default filters)
                       :else identity)
-        filtered-state (->> (:clojure.core.async.flow/state proc)
-                            (default-flow-state-filter)
-                            (filter user-filter)
-                            (into {}))]
+        filtered-state (cond
+                         (map? state) (->> state
+                                           (default-flow-state-filter)
+                                           (filter user-filter)
+                                           (into {}))
+                         (string? state) state
+                         :else (filter user-filter state))]
     (assoc proc :clojure.core.async.flow/state filtered-state)))
 
 (defn send-message [state message]
@@ -68,9 +72,7 @@
       (if (:loop-ping? @s)
         (do (send-message state {:action :ping :data (d/datafy (reduce-kv
                                                                  (fn [res k v]
-                                                                   (-> res
-                                                                       (assoc k (mainline-chan-meta v))
-                                                                       (assoc k (filter-state v (:filters @state)))))
+                                                                   (assoc res k (filter-state (mainline-chan-meta v) (:filters @state))))
                                                                  {}
                                                                  (async-flow/ping (:flow @state))))})
             (Thread/sleep 1000)
@@ -138,15 +140,20 @@
     - :handlers (optional) - A map of custom Transit write handlers to use when serializing state
                              data to send to the frontend. These handlers should follow the format
                              expected by cognitect.transit/writer :handlers
+    - :filters (optional) - A map of {:pid state-filter-pred} which is applied to the state
+                            for the associated pid. :default is also accepted and will be applied
+                            to any proc that doesn't have a filter specified for the pid.
+    - :root (optional) - A vector of :pid keywords to designate the root procs in the event of
+                         circular flows.
 
   Returns:
   An atom containing the server's state, and prints a local url where the frontend can be reached"
-  [{:keys [flow port handlers filters root] :or {port 9998}}]
+  [{:keys [flow port handlers state-filters root] :or {port 9998}}]
   (let [state (atom default-state)
         error-chan (:clojure.datafy/obj (meta (:error (:chans (d/datafy flow)))))
         report-chan (:clojure.datafy/obj (meta (:report (:chans (d/datafy flow)))))]
     (async-flow/ping flow)
-    (swap! state assoc :flow flow :handlers handlers :filters filters :root root)
+    (swap! state assoc :flow flow :handlers handlers :filters state-filters :root root)
     (report-monitoring state report-chan error-chan)
     (let [server (httpkit/run-server (app state) {:port port
                                                   :max-body 100000000
