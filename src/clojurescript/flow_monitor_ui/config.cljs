@@ -5,7 +5,3 @@
 
 ;; All other `goog-define` use the following syntax:
 (goog-define alert-timeout-ms 3000)
-
-;; ====
-(defonce websocket-uri-base "localhost:")
-(defonce websocket-uri-route "/flow-socket")

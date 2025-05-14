@@ -160,7 +160,7 @@
                                                   :legacy-return-value? false})]
       (swap! state assoc :server server)
       (println "\n--------------------------------")
-      (println (str "- Visit: http://localhost:" port "/index.html#/?port=" port " -"))
+      (println (str "- Visit: http://localhost:" port "/index.html"))
       (println "--------------------------------\n")
       state)))
 

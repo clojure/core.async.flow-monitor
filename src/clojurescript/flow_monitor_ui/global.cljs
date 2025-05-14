@@ -5,8 +5,7 @@
     [re-frame.core :as rf]
     [cognitect.transit :as t]
     [clojurescript.flow-monitor-ui.events :as events]
-    [clojurescript.flow-monitor-ui.utils.helpers :refer [>dis <sub]]
-    [clojurescript.flow-monitor-ui.config :refer [websocket-uri-base websocket-uri-route]]))
+    [clojurescript.flow-monitor-ui.utils.helpers :refer [>dis <sub]]))
 
 (defonce global-state (r/atom {:ws-chan nil
                                :ws-connected false
@@ -186,9 +185,12 @@
 
 (defn make-websocket! []
   (let [params (<sub [::get-params])
-        protocol (if (= (.-protocol js/window.location) "https:") "wss://" "ws://")]
+        location (.-location js/window)
+        protocol (if (= (.-protocol location) "https:") "wss://" "ws://")
+        host (.-host location)
+        socket-url (str protocol host "/flow-socket")]
     (if (not (:ws-connected @global-state))
-     (if-let [chan (js/WebSocket. (str protocol websocket-uri-base (or (:port params) 9998) websocket-uri-route))]
+     (if-let [chan (js/WebSocket. socket-url)]
        (do
          (swap! global-state assoc :ws-connected true)
          (set! (.-onmessage chan) (fn [msg]
@@ -200,7 +202,7 @@
                                   (remove-arrows)
                                   #_(make-websocket!)))
          (swap! global-state assoc :ws-chan chan)
-         (.log js/console (str "Websocket connection established with: " (str websocket-uri-base (or (:port params) 9998) websocket-uri-route))))
+         (.log js/console (str "Websocket connection established with: " socket-url)))
        (throw (js/Error. "Websocket connection failed!"))))))
 ; endregion
 
