@@ -185,9 +185,10 @@
     (get-in db [:query-params])))
 
 (defn make-websocket! []
-  (let [params (<sub [::get-params])]
+  (let [params (<sub [::get-params])
+        protocol (if (= (.-protocol js/window.location) "https:") "wss://" "ws://")]
     (if (not (:ws-connected @global-state))
-     (if-let [chan (js/WebSocket. (str websocket-uri-base (or (:port params) 9998) websocket-uri-route))]
+     (if-let [chan (js/WebSocket. (str protocol websocket-uri-base (or (:port params) 9998) websocket-uri-route))]
        (do
          (swap! global-state assoc :ws-connected true)
          (set! (.-onmessage chan) (fn [msg]
