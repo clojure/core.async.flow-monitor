@@ -35,7 +35,7 @@ Add the following dependency to your project:
 (def server-state (monitor/start-server {:flow my-flow :port 9876}))
 
 ;; The web interface will be available at:
-;; http://localhost:9876/index.html#/?port=9876
+;; http://localhost:9876/index.html
 ```
 
 ### Custom Transit Handlers
