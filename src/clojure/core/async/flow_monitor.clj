@@ -142,7 +142,9 @@
                              expected by cognitect.transit/writer :handlers
     - :state-filters (optional) - A map of {:pid state-filter-pred} which is applied to the state
                                   for the associated pid. :default is also accepted and will be applied
-                                  to any proc that doesn't have a filter specified for the pid.
+                                  to any proc that doesn't have a filter specified for the pid. The
+                                  state-filter-pred is applied as (filter state-filter-pred pid-state).
+                                  The state-filter-pred isn't applied if pid-state is a string.
     - :root (optional) - A vector of :pid keywords to designate the root procs in the event of
                          circular flows.
 
