@@ -18,7 +18,8 @@
 (def default-state {:server nil
                     :channels #{}
                     :loop-ping? false
-                    :flow nil})
+                    :flow nil
+                    :stop-chan nil})
 
 (def default-write-handler (transit/write-handler "default" (fn [obj] (str obj))))
 
@@ -117,18 +118,15 @@
     (wrap-content-type)
     (wrap-not-modified)))
 
-(defn report-monitoring [state report-chan error-chan]
+(defn report-monitoring [state report-chan error-chan stop-chan]
   (async/thread
     (loop []
-      (let [[val port] (async/alts!! [report-chan error-chan])]
-        (if (nil? val)
-          (prn "========= monitoring shutdown")
-          (do
-            (if (= port error-chan)
-              (send-message state {:action :error :data (with-out-str (clojure.pprint/pprint val))})
-              (send-message state {:action :message :data val}))
-            (recur))))))
-  nil)
+      (let [[val port] (async/alts!! [report-chan error-chan stop-chan])]
+        (when (and (some? val) (not= port stop-chan))
+          (if (= port error-chan)
+            (send-message state {:action :error :data (with-out-str (clojure.pprint/pprint val))})
+            (send-message state {:action :message :data val}))
+          (recur))))))
 
 (defn start-server
   "Starts a web server for monitoring and interacting with a core.async.flow
@@ -150,11 +148,12 @@
   An atom containing the server's state, and prints a local url where the frontend can be reached"
   [{:keys [flow port handlers state-filters root] :or {port 9998}}]
   (let [state (atom default-state)
+        stop-chan (async/chan)
         error-chan (:clojure.datafy/obj (meta (:error (:chans (d/datafy flow)))))
         report-chan (:clojure.datafy/obj (meta (:report (:chans (d/datafy flow)))))]
     (async-flow/ping flow)
-    (swap! state assoc :flow flow :handlers handlers :filters state-filters :root root)
-    (report-monitoring state report-chan error-chan)
+    (swap! state assoc :flow flow :handlers handlers :filters state-filters :root root :stop-chan stop-chan)
+    (report-monitoring state report-chan error-chan stop-chan)
     (let [server (httpkit/run-server (app state) {:port port
                                                   :max-body 100000000
                                                   :legacy-return-value? false})]
@@ -170,5 +169,6 @@
   Parameters:
     - server-atom (required) - The value returned from start-server"
   [server-state]
+  (async/close! (:stop-chan @server-state))
   (httpkit/server-stop! (:server @server-state))
   (reset! server-state default-state))
