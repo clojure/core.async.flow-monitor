@@ -138,9 +138,11 @@
     - :handlers (optional) - A map of custom Transit write handlers to use when serializing state
                              data to send to the frontend. These handlers should follow the format
                              expected by cognitect.transit/writer :handlers
-    - :filters (optional) - A map of {:pid state-filter-pred} which is applied to the state
-                            for the associated pid. :default is also accepted and will be applied
-                            to any proc that doesn't have a filter specified for the pid.
+    - :state-filters (optional) - A map of {:pid state-filter-pred} which is applied to the state
+                                  for the associated pid. :default is also accepted and will be applied
+                                  to any proc that doesn't have a filter specified for the pid. The
+                                  state-filter-pred is applied as (filter state-filter-pred pid-state).
+                                  The state-filter-pred isn't applied if pid-state is a string.
     - :root (optional) - A vector of :pid keywords to designate the root procs in the event of
                          circular flows.
 
