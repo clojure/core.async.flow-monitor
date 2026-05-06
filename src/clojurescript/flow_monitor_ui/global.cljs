@@ -110,7 +110,7 @@
                                                                                  :size 3
                                                                                  :startSocket "bottom"
                                                                                  :endSocket "top"
-                                                                                 :path "grid" #_"grid" #_"straight"
+                                                                                 :path "fluid" #_"grid" #_"straight"
                                                                                  :hide true
                                                                                  :endPlug (if product/FIREFOX "behind" "arrow1")
                                                                                  :animOptions (clj->js {:duration 1000 :timing "ease"})

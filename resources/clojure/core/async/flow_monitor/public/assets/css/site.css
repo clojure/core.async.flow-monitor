@@ -1282,6 +1282,7 @@ body.modal-open {
   align-items: center;
   margin-bottom: 40px;
   min-width: 220px;
+  max-width: 480px;
 }
 .card-container.line-chan-style {
   margin-bottom: 20px;
@@ -1289,6 +1290,7 @@ body.modal-open {
 .card-container .meter-cards, .card-container .output-cards {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   gap: 15px;
   margin-bottom: 30px;
   width: 100%;
@@ -1298,8 +1300,9 @@ body.modal-open {
   border-radius: 3px;
   padding: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
-  width: 100%;
+  flex: 0 1 260px;
   min-width: 150px;
+  max-width: 260px;
 }
 .card-container .meter-cards .meter-card .buffer-info, .card-container .meter-cards .output-card .buffer-info, .card-container .output-cards .meter-card .buffer-info, .card-container .output-cards .output-card .buffer-info {
   font-size: 1em;
@@ -1320,7 +1323,7 @@ body.modal-open {
   margin-bottom: 55px;
 }
 .card-container .proc-card.expanded .expanded-view {
-  max-height: 500px;
+  max-height: 750px;
   opacity: 1;
   visibility: visible;
 }
@@ -1779,6 +1782,58 @@ body.modal-open {
   overflow-x: auto;
   overflow-y: auto;
   scrollbar-width: auto;
+}
+
+.state-tree {
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.95em;
+  background-color: rgb(99.5162303665, 116.5068062827, 132.2837696335);
+  border-radius: 2px;
+  padding: 6px 8px;
+  margin: 10px;
+  max-height: 300px;
+  overflow: auto;
+  line-height: 1.4;
+  color: #E4E7EB;
+}
+.state-tree .tree-row {
+  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+.state-tree .tree-row.clickable {
+  cursor: pointer;
+}
+.state-tree .tree-row.clickable:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.state-tree .tree-toggle {
+  width: 1em;
+  flex-shrink: 0;
+  color: #4a4a4a;
+  font-size: 0.85em;
+  user-select: none;
+}
+.state-tree .tree-key {
+  color: #B3D4FC;
+  padding-right: 8px;
+}
+.state-tree .tree-summary {
+  color: #4a4a4a;
+  font-style: italic;
+}
+.state-tree .tree-bracket {
+  color: #4a4a4a;
+}
+.state-tree .tree-val {
+  color: #E4E7EB;
+}
+.state-tree .tree-children {
+  padding-left: 1.1em;
+  margin-left: 0.35em;
+  border-left: 1px dotted rgba(255, 255, 255, 0.12);
 }
 
 .centered-button-container {

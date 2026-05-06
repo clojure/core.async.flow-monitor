@@ -7,3 +7,4 @@ package-lock.json
 resources/public/assets/js/compiled/cljs-runtime/*
 src/clojurescript/sass/node_modules/*
 *.DS_Store
+cljs-runtime

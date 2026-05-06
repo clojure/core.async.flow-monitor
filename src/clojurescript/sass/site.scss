@@ -91,6 +91,7 @@ body.modal-open {
   align-items: center;
   margin-bottom: 40px;
   min-width: 220px;
+  max-width: 480px;
 
   &.line-chan-style {
     margin-bottom: 20px;
@@ -99,6 +100,7 @@ body.modal-open {
   .meter-cards, .output-cards {
     display: flex;
     flex-direction: row;
+    justify-content: center;
     gap: 15px;
     margin-bottom: 30px;
     width: 100%;
@@ -108,8 +110,9 @@ body.modal-open {
       border-radius: 3px;
       padding: 10px;
       box-shadow: 0 4px 12px $light-9;
-      width: 100%;
+      flex: 0 1 260px;
       min-width: 150px;
+      max-width: 260px;
 
       .buffer-info {
         font-size: 1em;
@@ -136,7 +139,7 @@ body.modal-open {
 
     &.expanded {
       .expanded-view {
-        max-height: 500px;
+        max-height: 750px;
         opacity: 1;
         visibility: visible;
       }
@@ -660,6 +663,60 @@ body.modal-open {
     overflow-x: auto;
     overflow-y: auto;
     scrollbar-width: auto;
+  }
+}
+
+.state-tree {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.95em;
+  background-color: lighten($light-20, 8%);
+  border-radius: 2px;
+  padding: 6px 8px;
+  margin: 10px;
+  max-height: 300px;
+  overflow: auto;
+  line-height: 1.4;
+  color: $light-21;
+
+  .tree-row {
+    white-space: nowrap;
+    display: flex;
+    align-items: baseline;
+    padding: 1px 2px;
+    border-radius: 2px;
+
+    &.clickable {
+      cursor: pointer;
+      &:hover { background: rgba(255, 255, 255, 0.06); }
+    }
+  }
+
+  .tree-toggle {
+    width: 1em;
+    flex-shrink: 0;
+    color: $light-5;
+    font-size: 0.85em;
+    user-select: none;
+  }
+
+  .tree-key {
+    color: #B3D4FC;
+    padding-right: 8px;
+  }
+
+  .tree-summary {
+    color: $light-5;
+    font-style: italic;
+  }
+
+  .tree-bracket { color: $light-5; }
+
+  .tree-val { color: $light-21; }
+
+  .tree-children {
+    padding-left: 1.1em;
+    margin-left: 0.35em;
+    border-left: 1px dotted rgba(255, 255, 255, 0.12);
   }
 }
 

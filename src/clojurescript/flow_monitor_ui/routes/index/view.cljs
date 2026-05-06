@@ -184,23 +184,46 @@
       (str/replace #"<" "&lt;")
       (str/replace #">" "&gt;")))
 
-(defn fmt-state
-  [data]
-  (letfn [(format-map [m indent-level]
-            (if (empty? m)
-              "{}"
-              (let [indent (str/join (repeat indent-level "  "))
-                    inner-indent (str indent "  ")
-                    pairs (for [[k v] m]
-                            (str inner-indent (pr-str k) " "
-                                 (if (map? v)
-                                   (format-map v (+ indent-level 1))
-                                   (pr-str v))))
-                    formatted (str "{\n" (str/join ",\n" pairs) "\n" indent "}")]
-                formatted)))]
-    (if (map? data)
-      (format-map data 0)
-      (pr-str data))))
+(defonce state-tree-expanded (r/atom {}))
+
+(defn bracket-pair [v]
+  (cond
+    (map? v)    ["{" "}"]
+    (set? v)    ["#{" "}"]
+    (vector? v) ["[" "]"]
+    (seq? v)    ["(" ")"]))
+
+(defn entries [v]
+  (if (map? v)
+    (for [[k c] v] [(pr-str k) k c])
+    (map-indexed (fn [i c] [nil i c]) v)))
+
+(defn tree-node [v path label]
+  (let [[op cl] (bracket-pair v)
+        coll? (and op (seq v))
+        root? (= 1 (count path))
+        open? (get @state-tree-expanded path root?)]
+    [:div.tree-node
+     [:div.tree-row
+      (when coll? {:class "clickable"
+                   :on-click #(swap! state-tree-expanded update path not)})
+      [:span.tree-toggle (when coll? (if open? "▾" "▸"))]
+      (when label [:span.tree-key (str label " ")])
+      (cond
+        (and coll? open?) [:span.tree-bracket op]
+        coll? [:span.tree-summary (str op (count v) " " (if (map? v) "keys" "items") cl)]
+        op [:span.tree-bracket (str op cl)]
+        :else [:span.tree-val (pr-str v)])]
+     (when (and coll? open?)
+       [:<>
+        [:div.tree-children
+         (for [[k seg c] (entries v)]
+           ^{:key (pr-str seg)} [tree-node c (conj path seg) k])]
+        [:div.tree-row [:span.tree-toggle] [:span.tree-bracket cl]]])]))
+
+(defn state-tree [proc data]
+  [:div.state-tree
+   [tree-node data [proc] nil]])
 
 (defn seconds-since [^js/Date t]
   (let [now (js/Date.)
@@ -215,7 +238,7 @@
     [:div.middle-section-one-container
      [:div.title-container [:h2.title (titleize-keyword proc)]]
      (when (not-empty (:state proc-stats))
-       [:div.state [:pre.code-block [:code (fmt-state (:state proc-stats))]]])
+       [:div.state [state-tree proc (:state proc-stats)]])
      [:div.call-count (format-number (:count proc-stats))]
      [:div.action-buttons
       [:div.action-button
