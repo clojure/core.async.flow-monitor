@@ -22,6 +22,11 @@
         (map clojure.string/capitalize $)
         (clojure.string/join " " $)))
 
+(defn fmt-io-id [k]
+  (if-let [kw-ns (namespace k)]
+    (str kw-ns "/" (name k))
+    (name k)))
+
 (defn format-number [n]
   (if n
     (.format (js/Intl.NumberFormat. "en-US") n)
@@ -333,13 +338,13 @@
          [:div.header-labels
           (doall (for [[io-id buffer-stats] ins
                        :when (:put-count buffer-stats)]
-                   ^{:key io-id} [:div.header-label {:id (str proc "-" io-id)} io-id]))]
+                   ^{:key io-id} [:div.header-label {:id (str proc "-" io-id)} (fmt-io-id io-id)]))]
          [proc-card proc proc-stats]
          [:div.output-section
           [:div.output-container
            (doall (for [[io-id buffer-stats] outs
                         :when (-> buffer-stats :buffer :type)]
-                    ^{:key (str proc "-" io-id)} [:div.output {:id (str proc "-" io-id)} io-id]))]]]
+                    ^{:key (str proc "-" io-id)} [:div.output {:id (str proc "-" io-id)} (fmt-io-id io-id)]))]]]
         [:div.collapsed-view-container
          [:div.header-els
           (doall (for [[io-id buffer-stats] ins
