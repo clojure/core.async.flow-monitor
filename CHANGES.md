@@ -1,5 +1,8 @@
-# v0.1.4
+ # v0.1.5
+ * Enhancement: Display ns is present for in/outs
+ * Enhancement: Improve display and navigation of proc state
 
+ # v0.1.4
  * Enhancement: Add explicit stop channel so monitoring loop exits cleanly on stop-server
 
  # v0.1.3
@@ -10,7 +13,6 @@
  * Enhancement: Use wss when window.location is https
 
 # v0.1.1
-
 * Bug Fix: Multi outs to a single in were displaying duplicate chan representations
 * Enhancement: Support optionally filtering the state displayed in procs
 * Enhancement: Support circular flows
