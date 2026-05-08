@@ -16,7 +16,7 @@ Add the following dependency to your project:
 
 ```clojure
 ;; deps.edn
-{:deps {io.github.clojure/core.async.flow-monitor {:git/tag "v0.1.4" :git/sha "9b8c327"}}}
+{:deps {io.github.clojure/core.async.flow-monitor {:git/tag "v0.1.5" :git/sha "376d6ec"}}}
 ```
 
 ## Usage
