@@ -2,7 +2,7 @@
 
 A real-time monitoring and interaction tool for [clojure.core.async.flow](https://clojure.github.io/core.async/flow.html)
 
-<img width="2189" alt="flow-example-gif" src="https://github.com/user-attachments/assets/ddef50e1-ccb0-43cb-8dd2-f52b9e69bb55">
+<img width="3028" height="2714" alt="flow-example-gif" src="https://github.com/user-attachments/assets/e7dd55ae-c225-48b0-9aad-5d4c02ed35a8" />
 
 ## Overview
 
